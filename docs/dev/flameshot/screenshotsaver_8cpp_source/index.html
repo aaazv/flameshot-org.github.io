@@ -615,7 +615,8 @@ bool saveToFilesystemGUI(const QPixmap&amp; capture)
     }
 #endif
     if (!config.savePathFixed()) {
-        savePath = ShowSaveFileDialog(QObject::tr(&quot;Save screenshot&quot;), savePath);
+        savePath = QDir::toNativeSeparators(
+          ShowSaveFileDialog(QObject::tr(&quot;Save screenshot&quot;), savePath));
     }
     if (savePath == &quot;&quot;) {
         return okay;
@@ -634,7 +635,7 @@ bool saveToFilesystemGUI(const QPixmap&amp; capture)
 
     if (okay) {
         QString pathNoFile =
-          savePath.left(savePath.lastIndexOf(QLatin1String(&quot;/&quot;)));
+          savePath.left(savePath.lastIndexOf(QDir::separator()));
 
         ConfigHandler().setSavePath(pathNoFile);
 
