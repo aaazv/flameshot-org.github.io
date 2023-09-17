@@ -508,6 +508,44 @@ QSharedMemory* guiMutexLock()
     return shm;
 }
 
+QTranslator translator, qtTranslator;
+
+void configureApp(bool gui)
+{
+    if (gui) {
+        QApplication::setStyle(new StyleOverride);
+    }
+
+    // Configure translations
+    for (const QString&amp; path : PathInfo::translationsPaths()) {
+        bool match = translator.load(QLocale(),
+                                     QStringLiteral(&quot;Internationalization&quot;),
+                                     QStringLiteral(&quot;_&quot;),
+                                     path);
+        if (match) {
+            break;
+        }
+    }
+
+    qtTranslator.load(QLocale::system(),
+                      &quot;qt&quot;,
+                      &quot;_&quot;,
+                      QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+
+    auto app = QCoreApplication::instance();
+    app-&gt;installTranslator(&amp;translator);
+    app-&gt;installTranslator(&amp;qtTranslator);
+    app-&gt;setAttribute(Qt::AA_DontCreateNativeWidgetSiblings, true);
+}
+
+// TODO find a way so we don't have to do this
+void reinitializeAsQApplication(int argc, char* argv[])
+{
+    delete QCoreApplication::instance();
+    new QApplication(argc, argv);
+    configureApp(true);
+}
+
 int main(int argc, char* argv[])
 {
 #ifdef Q_OS_LINUX
@@ -528,31 +566,7 @@ int main(int argc, char* argv[])
 #else
         QtSingleApplication app(argc, argv);
 #endif
-        QApplication::setStyle(new StyleOverride);
-
-        QTranslator translator, qtTranslator;
-        QStringList trPaths = PathInfo::translationsPaths();
-
-        for (const QString&amp; path : trPaths) {
-            bool match = translator.load(QLocale(),
-                                         QStringLiteral(&quot;Internationalization&quot;),
-                                         QStringLiteral(&quot;_&quot;),
-                                         path);
-            if (match) {
-                break;
-            }
-        }
-
-        qtTranslator.load(
-          QLocale::system(),
-          &quot;qt&quot;,
-          &quot;_&quot;,
-          QLibraryInfo::location(QLibraryInfo::TranslationsPath));
-
-        qApp-&gt;installTranslator(&amp;translator);
-        qApp-&gt;installTranslator(&amp;qtTranslator);
-        qApp-&gt;setAttribute(Qt::AA_DontCreateNativeWidgetSiblings, true);
-
+        configureApp(true);
         auto c = Flameshot::instance();
         FlameshotDaemon::start();
 
@@ -574,6 +588,7 @@ int main(int argc, char* argv[])
      * CLI parsing  |
      * ------------*/
     new QCoreApplication(argc, argv);
+    configureApp(false);
     CommandLineParser parser;
     // Add description
     parser.setDescription(
@@ -767,14 +782,12 @@ int main(int argc, char* argv[])
     Flameshot::setOrigin(Flameshot::CLI);
     if (parser.isSet(helpOption) || parser.isSet(versionOption)) {
     } else if (parser.isSet(launcherArgument)) { // LAUNCHER
-        delete qApp;
-        new QApplication(argc, argv);
+        reinitializeAsQApplication(argc, argv);
         Flameshot* flameshot = Flameshot::instance();
         flameshot-&gt;launcher();
         qApp-&gt;exec();
     } else if (parser.isSet(guiArgument)) { // GUI
-        delete qApp;
-        new QApplication(argc, argv);
+        reinitializeAsQApplication(argc, argv);
         // Prevent multiple instances of 'flameshot gui' from running if not
         // configured to do so.
         if (!ConfigHandler().allowMultipleGuiInstances()) {
@@ -837,10 +850,7 @@ int main(int argc, char* argv[])
         }
         requestCaptureAndWait(req);
     } else if (parser.isSet(fullArgument)) { // FULL
-        // Recreate the application as a QApplication
-        // TODO find a way so we don't have to do this
-        delete qApp;
-        new QApplication(argc, argv);
+        reinitializeAsQApplication(argc, argv);
 
         // Option values
         QString path = parser.value(pathOption);
@@ -875,10 +885,7 @@ int main(int argc, char* argv[])
         }
         requestCaptureAndWait(req);
     } else if (parser.isSet(screenArgument)) { // SCREEN
-        // Recreate the application as a QApplication
-        // TODO find a way so we don't have to do this
-        delete qApp;
-        new QApplication(argc, argv);
+        reinitializeAsQApplication(argc, argv);
 
         QString numberStr = parser.value(screenNumberOption);
         // Option values
@@ -949,8 +956,7 @@ int main(int argc, char* argv[])
         }
         if (!someFlagSet) {
             // Open gui when no options are given
-            delete qApp;
-            new QApplication(argc, argv);
+            reinitializeAsQApplication(argc, argv);
             QObject::connect(
               qApp, &amp;QApplication::lastWindowClosed, qApp, &amp;QApplication::quit);
             Flameshot::instance()-&gt;config();
