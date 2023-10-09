@@ -449,7 +449,7 @@ auto helpOption =
   CommandOption({ &quot;h&quot;, &quot;help&quot; }, QStringLiteral(&quot;Displays this help&quot;));
 
 QString optionsToString(const QList&lt;CommandOption&gt;&amp; options,
-                        const QList&lt;CommandArgument&gt;&amp; arguments)
+                        const QList&lt;CommandArgument&gt;&amp; subcommands)
 {
     int size = 0; // track the largest size
     QStringList dashedOptionList;
@@ -467,10 +467,10 @@ QString optionsToString(const QList&lt;CommandOption&gt;&amp; options,
         }
         dashedOptionList &lt;&lt; joinedDashedOptions;
     }
-    // check the length of the arguments
-    for (auto const&amp; arg : arguments) {
-        if (arg.name().length() &gt; size) {
-            size = arg.name().length();
+    // check the length of the subcommands
+    for (auto const&amp; subcommand : subcommands) {
+        if (subcommand.name().length() &gt; size) {
+            size = subcommand.name().length();
         }
     }
     // generate the text
@@ -485,17 +485,17 @@ QString optionsToString(const QList&lt;CommandOption&gt;&amp; options,
                         .arg(options.at(i).description().replace(
                           QLatin1String(&quot;\n&quot;), linePadding));
         }
-        if (!arguments.isEmpty()) {
+        if (!subcommands.isEmpty()) {
             result += QLatin1String(&quot;\n&quot;);
         }
     }
-    if (!arguments.isEmpty()) {
-        result += QObject::tr(&quot;Arguments&quot;) + &quot;:\n&quot;;
+    if (!subcommands.isEmpty()) {
+        result += QObject::tr(&quot;Subcommands&quot;) + &quot;:\n&quot;;
     }
-    for (const auto&amp; argument : arguments) {
+    for (const auto&amp; subcommand : subcommands) {
         result += QStringLiteral(&quot;  %1  %2\n&quot;)
-                    .arg(argument.name().leftJustified(size, ' '))
-                    .arg(argument.description());
+                    .arg(subcommand.name().leftJustified(size, ' '))
+                    .arg(subcommand.description());
     }
     return result;
 }
@@ -751,7 +751,7 @@ void CommandLineParser::printHelp(QStringList args, const Node* node)
         argName = qApp-&gt;applicationName();
     }
     QString argText =
-      node-&gt;subNodes.isEmpty() ? &quot;&quot; : &quot;[&quot; + QObject::tr(&quot;arguments&quot;) + &quot;]&quot;;
+      node-&gt;subNodes.isEmpty() ? &quot;&quot; : &quot;[&quot; + QObject::tr(&quot;subcommands&quot;) + &quot;]&quot;;
     helpText += (QObject::tr(&quot;Usage&quot;) + &quot;: %1 [%2-&quot; + QObject::tr(&quot;options&quot;) +
                  QStringLiteral(&quot;] %3\n\n&quot;))
                   .arg(args.join(QStringLiteral(&quot; &quot;)))
@@ -764,9 +764,9 @@ void CommandLineParser::printHelp(QStringList args, const Node* node)
     helpText += &quot;\n\n&quot;;
 
     // add command options and subarguments
-    QList&lt;CommandArgument&gt; subArgs;
+    QList&lt;CommandArgument&gt; subcommands;
     for (const Node&amp; n : node-&gt;subNodes) {
-        subArgs.append(n.argument);
+        subcommands.append(n.argument);
     }
     auto modifiedOptions = node-&gt;options;
     if (m_withHelp) {
@@ -775,7 +775,7 @@ void CommandLineParser::printHelp(QStringList args, const Node* node)
     if (m_withVersion &amp;&amp; node == &amp;m_parseTree) {
         modifiedOptions &lt;&lt; versionOption;
     }
-    helpText += optionsToString(modifiedOptions, subArgs);
+    helpText += optionsToString(modifiedOptions, subcommands);
     // print it
     out &lt;&lt; helpText;
 }

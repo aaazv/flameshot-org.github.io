@@ -597,8 +597,9 @@ int main(int argc, char* argv[])
       QObject::tr(&quot;Powerful yet simple to use screenshot software.&quot;));
     parser.setGeneralErrorMessage(QObject::tr(&quot;See&quot;) + &quot; flameshot --help.&quot;);
     // Arguments
-    CommandArgument fullArgument(QStringLiteral(&quot;full&quot;),
-                                 QObject::tr(&quot;Capture the entire desktop.&quot;));
+    CommandArgument fullArgument(
+      QStringLiteral(&quot;full&quot;),
+      QObject::tr(&quot;Capture screenshot of all monitors at the same time.&quot;));
     CommandArgument launcherArgument(QStringLiteral(&quot;launcher&quot;),
                                      QObject::tr(&quot;Open the capture launcher.&quot;));
     CommandArgument guiArgument(
@@ -606,8 +607,9 @@ int main(int argc, char* argv[])
       QObject::tr(&quot;Start a manual capture in GUI mode.&quot;));
     CommandArgument configArgument(QStringLiteral(&quot;config&quot;),
                                    QObject::tr(&quot;Configure&quot;) + &quot; flameshot.&quot;);
-    CommandArgument screenArgument(QStringLiteral(&quot;screen&quot;),
-                                   QObject::tr(&quot;Capture a single screen.&quot;));
+    CommandArgument screenArgument(
+      QStringLiteral(&quot;screen&quot;),
+      QObject::tr(&quot;Capture a screenshot of the specified monitor.&quot;));
 
     // Options
     CommandOption pathOption(
