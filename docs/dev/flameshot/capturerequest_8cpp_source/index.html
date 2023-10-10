@@ -446,7 +446,8 @@ CaptureRequest::CaptureRequest(CaptureRequest::CaptureMode mode,
 {
 
     ConfigHandler config;
-    if (config.saveLastRegion()) {
+    if (m_mode == CaptureRequest::CaptureMode::GRAPHICAL_MODE &amp;&amp;
+        config.saveLastRegion()) {
         setInitialSelection(getLastRegion());
     }
 }

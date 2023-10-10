@@ -678,9 +678,10 @@ void GeneralConf::initShowHelp()
 
 void GeneralConf::initSaveLastRegion()
 {
-    m_saveLastRegion = new QCheckBox(tr(&quot;Use last region&quot;), this);
-    m_saveLastRegion-&gt;setToolTip(tr(&quot;Uses the last region as the default &quot;
-                                    &quot;selection for the next screenshot&quot;));
+    m_saveLastRegion = new QCheckBox(tr(&quot;Use last region for GUI mode&quot;), this);
+    m_saveLastRegion-&gt;setToolTip(
+      tr(&quot;Use the last region as the default selection for the next screenshot &quot;
+         &quot;in GUI mode&quot;));
     m_scrollAreaLayout-&gt;addWidget(m_saveLastRegion);
 
     connect(m_saveLastRegion,
