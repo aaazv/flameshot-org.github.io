@@ -44,3 +44,18 @@ For the time being, the Commandline Interface (CLI) is **not** implemented for W
 
 -------
 
+# Fix Flameshot not starting on windows startup
+
+Steps:
+1. go to the flameshot installation folder, right click on it, create a shortcut. As you can't add it to the main folder, it asks you to create it in desktop. Agree.
+2. Click: Win+R -> type: shell:startup -> then drag and drop the shortcut you created, in the startup windows.
+3. Disable the in-app "Launch on startup" option from the in-app configurations.
+4. Right click on the app shortcut you created which now is in startup folder
+5. Make sure the "Run this program as Administrator" option is off.
+6. Click on the change settings for all users
+7. Enable the "register this program for restart" and click ok.
+8. Make sure compatibility mode is off.
+9. Restart windows.
+
+You can access more information here:
+(https://github.com/flameshot-org/flameshot/issues/3381)
